@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vera-skill.local/schemas/catalog.schema.json",
+  "title": "VERA Activity Billing Catalog Schema",
+  "description": "Schema formal para validação de catálogos de atividades e repertórios de estimativas em UST utilizados pela skill VERA.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "catalog_metadata",
+    "sources_of_truth_hierarchy",
+    "global_validation_rules",
+    "crud_and_elementary_units_agreement",
+    "sections",
+    "activities"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Versão semântica do schema do catálogo."
+    },
+    "catalog_metadata": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "subtitle",
+        "source_document",
+        "currency_unit",
+        "is_exhaustive",
+        "introductory_note"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Identificador único do catálogo (slug)."
+        },
+        "title": {
+          "type": "string",
+          "description": "Título oficial do catálogo."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Subtítulo ou classificação do documento."
+        },
+        "source_document": {
+          "type": "string",
+          "description": "Referência ao anexo ou documento normativo de origem."
+        },
+        "currency_unit": {
+          "type": "string",
+          "enum": ["UST"],
+          "description": "Unidade métrica padrão de faturamento."
+        },
+        "is_exhaustive": {
+          "type": "boolean",
+          "description": "Indica se o rol de atividades do catálogo é exaustivo."
+        },
+        "introductory_note": {
+          "type": "string",
+          "description": "Nota introdutória oficial do catálogo."
+        }
+      },
+      "additionalProperties": false
+    },
+    "sources_of_truth_hierarchy": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["priority", "source", "rule"],
+        "properties": {
+          "priority": { "type": "integer", "minimum": 1 },
+          "source": { "type": "string" },
+          "rule": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "global_validation_rules": {
+      "type": "object",
+      "required": [
+        "strict_catalog_adherence",
+        "warranty_zero_cost_rule",
+        "prior_authorization_rule",
+        "enum_per_commit_rule",
+        "recurrence_in_same_demand_rule",
+        "hunk_deduplication_rule",
+        "category_plus_um_comparison_rule",
+        "redmine_100_percent_billed_criteria",
+        "cast_13_2024_complexity_tiers_rule",
+        "unit_test_coverage_counting_rule",
+        "same_delivery_cycle_no_double_alteration_rule",
+        "single_catalog_per_subtask_rule",
+        "note_and_metadata_consistency_rule",
+        "evidence_classification_levels"
+      ],
+      "properties": {
+        "strict_catalog_adherence": { "type": "string" },
+        "warranty_zero_cost_rule": { "type": "string" },
+        "prior_authorization_rule": { "type": "string" },
+        "enum_per_commit_rule": { "type": "string" },
+        "recurrence_in_same_demand_rule": { "type": "string" },
+        "hunk_deduplication_rule": { "type": "string" },
+        "category_plus_um_comparison_rule": { "type": "string" },
+        "redmine_100_percent_billed_criteria": { "type": "string" },
+        "cast_13_2024_complexity_tiers_rule": { "type": "string" },
+        "unit_test_coverage_counting_rule": { "type": "string" },
+        "same_delivery_cycle_no_double_alteration_rule": { "type": "string" },
+        "single_catalog_per_subtask_rule": { "type": "string" },
+        "note_and_metadata_consistency_rule": { "type": "string" },
+        "evidence_classification_levels": {
+          "type": "object",
+          "required": [
+            "EVIDENCIA_VERIFICADA",
+            "INFERENCIA_TECNICA",
+            "INFORMACAO_AUSENTE"
+          ],
+          "properties": {
+            "EVIDENCIA_VERIFICADA": { "type": "string" },
+            "INFERENCIA_TECNICA": { "type": "string" },
+            "INFORMACAO_AUSENTE": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "crud_and_elementary_units_agreement": {
+      "type": "object",
+      "required": [
+        "description",
+        "must_be_counted",
+        "cross_catalog_warning",
+        "must_not_be_counted",
+        "disregarded_code_patterns"
+      ],
+      "properties": {
+        "description": { "type": "string" },
+        "must_be_counted": { "type": "string" },
+        "cross_catalog_warning": { "type": "string" },
+        "must_not_be_counted": {
+          "type": "object",
+          "required": ["general_principle", "explicit_exclusions"],
+          "properties": {
+            "general_principle": { "type": "string" },
+            "explicit_exclusions": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "disregarded_code_patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["category", "rule"],
+            "properties": {
+              "category": { "type": "string" },
+              "rule": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "number", "title", "description"],
+        "properties": {
+          "id": { "type": "string" },
+          "number": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "activities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "tag",
+          "tag_aliases",
+          "title",
+          "section_id",
+          "description",
+          "professional_profile",
+          "deliverable",
+          "unit_of_measure",
+          "ust",
+          "complexity_rules",
+          "validation_guidelines"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "tag": { "type": "string" },
+          "tag_aliases": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "title": { "type": "string" },
+          "section_id": { "type": "string" },
+          "description": { "type": "string" },
+          "professional_profile": { "type": "string" },
+          "deliverable": { "type": "string" },
+          "unit_of_measure": { "type": "string" },
+          "ust": {
+            "type": "object",
+            "required": [
+              "base_value",
+              "raw_text",
+              "calculation_type",
+              "unit_parameter",
+              "formula_description"
+            ],
+            "properties": {
+              "base_value": { "type": "number", "minimum": 0 },
+              "high_complexity_value": { "type": ["number", "null"] },
+              "warranty_value": { "type": ["number", "null"] },
+              "raw_text": { "type": "string" },
+              "calculation_type": {
+                "type": "string",
+                "enum": [
+                  "fixed_unique",
+                  "per_unit",
+                  "per_block",
+                  "per_hour",
+                  "conditional_warranty"
+                ]
+              },
+              "block_size": { "type": ["number", "null"] },
+              "unit_parameter": { "type": "string" },
+              "formula_description": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "complexity_rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["level", "condition", "metric", "threshold_description"],
+              "properties": {
+                "level": { "type": "string", "enum": ["Alta", "Altíssima"] },
+                "condition": { "type": "string" },
+                "metric": { "type": "string" },
+                "threshold_description": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "validation_guidelines": {
+            "type": "object",
+            "required": [
+              "requires_git_evidence",
+              "requires_prior_authorization",
+              "is_exceptional",
+              "primary_evidence_sources",
+              "expected_artifacts",
+              "llm_audit_checklist"
+            ],
+            "properties": {
+              "requires_git_evidence": {
+                "type": "string",
+                "enum": ["required", "when_applicable", "not_required"]
+              },
+              "requires_prior_authorization": { "type": "boolean" },
+              "is_exceptional": { "type": "boolean" },
+              "primary_evidence_sources": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "gitlab_commits_diffs",
+                    "redmine_issue",
+                    "redmine_attachment",
+                    "deploy_tool_log",
+                    "external_ticket_system"
+                  ]
+                }
+              },
+              "expected_artifacts": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "llm_audit_checklist": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

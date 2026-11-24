@@ -1,0 +1,86 @@
+# =============================================================================
+# VERA — Configuração Geral Ativa da Skill (v0.5.0)
+# =============================================================================
+# Este arquivo orquestra os módulos da VERA (conectores, catálogo ativo,
+# regras de validação Economia/CAST e parâmetros de relatório).
+# Não contém credenciais sensíveis (que ficam isoladas em ./config/gitlab.yaml
+# e ./config/redmine.yaml).
+# =============================================================================
+
+vera:
+  version: "0.5.0"
+  language: "pt-BR"
+
+  # Diretrizes globais de segurança e governança
+  governance:
+    enforce_read_only: true
+    treat_output_as_proposal_only: true
+    allow_unverified_catalog_codes: false
+    require_explicit_evidence_classification: true
+    enforce_warranty_zero_cost: true
+    require_prior_authorization_check: true
+    mask_sensitive_data: true
+
+  # Referências aos arquivos de configuração e scripts dos conectores
+  connectors:
+    redmine_config: "./config/redmine.yaml"
+    redmine_script_ps1: "./scripts/redmine-connector.ps1"
+    redmine_script_sh: "./scripts/redmine-connector.sh"
+    gitlab_config: "./config/gitlab.yaml"
+    gitlab_script_ps1: "./scripts/gitlab-connector.ps1"
+    gitlab_script_sh: "./scripts/gitlab-connector.sh"
+
+  # Configuração de catálogos de faturamento
+  catalogs:
+    directory: "./catalogs"
+    schema_file: "./catalogs/catalog.schema.json"
+    active_catalogs:
+      - id: "catalogo-atividades-anexo-i"
+        name: "ANEXO I — CATÁLOGO DE ATIVIDADES (Repertório de Estimativas + Acordo Economia/CAST)"
+        file: "./catalogs/catalogo-atividades.yaml"
+        enabled: true
+
+  # Regras de validação e contagem (Entendimento Acordado Economia & CAST)
+  validation:
+    evidence_levels:
+      - "EVIDENCIA_VERIFICADA"   # Comprovada diretamente por entregável/commit/diff e vínculo explícito
+      - "INFERENCIA_TECNICA"     # Deduzida por autor/período/escopo sem vínculo explícito formal
+      - "INFORMACAO_AUSENTE"     # Sem entregável, métrica, código ou autorização prévia localizada
+
+    code_counting_rules:
+      enum_max_um_per_commit: 1
+      unit_test_one_um_per_covered_billed_item: true
+      deduplicate_hunks_per_unit: true
+      exclude_getters_setters_and_delegation_layers: true
+      exclude_static_ui_widgets_and_one_line_triggers: true
+      flag_simulated_or_mock_services_in_production: true
+      forbid_same_delivery_cycle_double_alteration: true
+      forbid_mixing_creation_and_alteration_in_same_subtask: true
+      require_confirmation_and_justification_on_recurrence: true
+
+    redmine_audit_rules:
+      compare_strictly_by_category_and_um: true
+      enforce_cast_13_2024_complexity_tiers: true
+      enforce_lean_task_notes: true
+      verify_note_file_paths_against_git_diff: true
+      verify_sistema_modulo_against_repo: true
+      verify_title_tag_against_catalog_field: true
+      require_spent_hours_greater_than_zero: true
+      flag_tasks_without_commits: true
+      flag_commits_without_tasks: true
+      default_time_entry_activity: "Desenvolvimento"
+      default_time_entry_activity_id: 9
+
+  # Parâmetros para geração de relatórios
+  reporting:
+    output_format: "markdown"
+    templates_directory: "./templates"
+    default_template: "./templates/ust-validation-report.template.md"
+    demand_audit_template: "./templates/demand-audit-report.template.md"
+    task_note_template: "./templates/redmine-task-note.template.md"
+    script_task_note_template: "./templates/redmine-script-note.template.md"
+    deploy_task_note_template: "./templates/redmine-deploy-note.template.md"
+    include_disregarded_items_section: true
+    include_human_review_questions: true
+    include_publication_checklist: true
+    include_ust_calculation_memory: true

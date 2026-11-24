@@ -1,0 +1,46 @@
+# =============================================================================
+# VERA — Modelo de Configuração do Módulo GitLab (v0.3.0)
+# =============================================================================
+# ATENÇÃO:
+# - Este arquivo (`gitlab.example.yaml`) é o modelo versionado sem credenciais.
+# - A configuração real e o Personal Access Token ficam armazenados em
+#   `./config/gitlab.yaml`, que é automaticamente ignorado pelo `.gitignore`.
+# - Caso `./config/gitlab.yaml` não exista no primeiro uso, a skill VERA
+#   guiará o usuário interativamente para criá-lo e validar o token.
+# =============================================================================
+
+gitlab:
+  # URL base da instância do GitLab da organização (sem barra no final)
+  base_url: "https://gitlab.exemplo.gov.br"
+  api_version: "v4"
+
+  # Autenticação via Personal Access Token (PAT) com escopo somente leitura
+  # Escopos necessários no GitLab: `read_api` e `read_repository`
+  auth:
+    personal_access_token: ""
+    verify_ssl: true
+    timeout_seconds: 30
+
+  # Modo de operação estrito (somente leitura obrigatório — apenas GET)
+  access_mode: "read_only"
+
+  # Projeto padrão opcional (path_with_namespace ou ID numérico)
+  default_project: ""
+
+  # Padrões para correlação entre commits/branches/MRs e tarefas do Redmine
+  traceability_patterns:
+    # Exemplo de regex para identificar IDs de issues (ex.: #12345, Demanda #12345, RM-12345)
+    issue_reference_regex: "(?:#|Demanda\\s+#?|refs\\s+#|RM-)(\\d+)"
+    # Exemplo de padrão de nomenclatura de branches (ex.: 12345_descricao ou feature/12345-descricao)
+    branch_issue_regex: "(?:^(?:feature|bugfix|hotfix|task)/|^)(\\d+)[-_].+"
+
+  # Limites e filtros para coleta de diffs
+  diff_analysis:
+    include_merge_commits: false
+    max_diff_lines_per_commit: 5000
+    ignored_paths:
+      - "package-lock.json"
+      - "yarn.lock"
+      - "poetry.lock"
+      - "*.min.js"
+      - "*.min.css"

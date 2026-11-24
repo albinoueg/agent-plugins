@@ -1,0 +1,51 @@
+# =============================================================================
+# .gitignore — Skill VERA
+# =============================================================================
+
+# Arquivos de configuração locais contendo credenciais ou URLs reais
+config/*.yaml
+config/*.yml
+config/*.json
+!config/vera.yaml
+!config/*.example.yaml
+!config/*.example.yml
+!config/*.example.json
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*secret*
+*token*
+*credentials*
+
+# Relatórios gerados e dados extraídos localmente (podem conter dados internos)
+output/
+reports/
+tmp/
+cache/
+*.report.md
+
+# Ambientes virtuais e caches de linguagens (para futuros scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+
+# Arquivos de sistema operacional e IDEs
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

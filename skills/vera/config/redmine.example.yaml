@@ -1,0 +1,36 @@
+# =============================================================================
+# VERA — Modelo de Configuração do Módulo Redmine (v0.4.0)
+# =============================================================================
+# ATENÇÃO:
+# - Este arquivo (`redmine.example.yaml`) é o modelo versionado sem credenciais.
+# - A configuração real e a Chave de Acesso API (API Key) ficam armazenadas em
+#   `./config/redmine.yaml`, que é automaticamente ignorado pelo `.gitignore`.
+# - Caso `./config/redmine.yaml` não exista no primeiro uso, a skill VERA
+#   guiará o usuário interativamente para criá-lo e validar a chave.
+# =============================================================================
+
+redmine:
+  # URL base da instância do Redmine da organização (sem barra no final)
+  base_url: "https://redmine.exemplo.gov.br"
+
+  # Autenticação via Chave de Acesso API (X-Redmine-API-Key)
+  auth:
+    api_key: ""
+    verify_ssl: true
+    timeout_seconds: 30
+
+  # Modo de operação estrito (somente leitura obrigatório — apenas GET)
+  access_mode: "read_only"
+
+  # Identificador de projeto padrão opcional
+  default_project: ""
+
+  # Escopo padrão para consultas e lançamentos de tarefas
+  defaults:
+    include_subtasks: true
+    include_journals: true
+    include_attachments: true
+    include_time_entries: true
+    pagination_limit: 100
+    default_time_entry_activity: "Desenvolvimento"
+    default_time_entry_activity_id: 9

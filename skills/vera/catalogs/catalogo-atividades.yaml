@@ -1,0 +1,1582 @@
+# =============================================================================
+# VERA — Catálogo Estruturado de Atividades (Repertório de Estimativas)
+# =============================================================================
+# Fonte Normativa: ANEXO I — CATÁLOGO DE ATIVIDADES - (Repertório de Estimativas)
+#                  + Entendimento Acordado Economia & CAST
+# Schema de Validação: ./catalog.schema.json
+# Formato otimizado para leitura direta por LLMs e validação determinística.
+# =============================================================================
+
+schema_version: "1.2.0"
+
+catalog_metadata:
+  id: "catalogo-atividades-anexo-i"
+  title: "CATÁLOGO DE ATIVIDADES"
+  subtitle: "Repertório de Estimativas (Economia & CAST)"
+  source_document: "ANEXO I — CATÁLOGO DE ATIVIDADES - (Repertório de Estimativas) e Entendimentos Acordados Economia/CAST"
+  currency_unit: "UST"
+  is_exhaustive: false
+  introductory_note: >-
+    O Catálogo de Serviços foi, em sua maioria, concebido por subprocesso da
+    Engenharia de Software. Devido a constante mudança tecnológica e a
+    diversidade de serviços de TI existentes, o rol das atividades descritas
+    no catálogo não é exaustivo.
+
+sources_of_truth_hierarchy:
+  - priority: 1
+    source: "Catálogo contratual de atividades/UST vigente"
+    rule: "Unidade de medida, produto exigido, valores de UST e restrições formais do catálogo têm precedência máxima."
+  - priority: 2
+    source: "Entendimentos e regras específicas comprovadas entre Economia e CAST"
+    rule: "Regras acordadas para interpretação de unidades elementares CRUD, operações acessórias, enums, garantia, reuso e aceitação."
+  - priority: 3
+    source: "Demanda/Issue e critérios de aceitação no Redmine"
+    rule: "Escopo funcional solicitado, histórico de notas, anexos e apontamentos registrados na tarefa."
+  - priority: 4
+    source: "Diff real do Git (GitLab ou repositório local) e arquivos de contexto"
+    rule: "Alterações materiais de código (interfaces, DTOs, implementações, testes, controladores e configurações)."
+  - priority: 5
+    source: "Exemplos históricos aprovados"
+    rule: "Utilizados apenas como referência de estilo e formatação de evidências, nunca para contrariar o catálogo ou as regras acordadas."
+
+global_validation_rules:
+  strict_catalog_adherence: >-
+    Todo enquadramento deve utilizar exclusivamente as tags, descrições,
+    unidades de medida e valores de UST definidos neste catálogo. É vedado
+    inventar códigos, extrapolar faixas ou atribuir UST sem o entregável
+    (Produto) exigido. A saída da VERA é sempre uma proposta auditável e nunca
+    deve ser tratada como faturamento automaticamente aprovado.
+  warranty_zero_cost_rule: >-
+    Conforme definido na atividade [problema], caso seja detectado que um
+    problema reportado se trata de garantia contratual, tanto a tarefa de
+    verificação quanto todas as tarefas relacionadas à sua correção devem ser
+    tratadas como garantia, com custo zero (0 UST).
+  prior_authorization_rule: >-
+    Atividades marcadas com requires_prior_authorization: true ([avaliacao-squad],
+    [Documento] e [Parecer-técnico]) exigem comprovação explícita de autorização
+    prévia. Na ausência dessa evidência, classificar como INFORMACAO_AUSENTE.
+  enum_per_commit_rule: >-
+    Para um mesmo commit, se houver a criação ([backend]) ou alteração
+    ([backend-alteracao]) de um ou mais enums, deve ser contabilizada 1 UM por
+    commit (na respectiva categoria). Se houver 1 ou 10 enums criados ou
+    alterados no mesmo commit, sempre será contabilizado somente 1 UM. Caso
+    enums sejam criados/alterados em commits diferentes, cada commit com
+    criação/alteração de enum contabilizará 1 UM na respectiva categoria.
+  recurrence_in_same_demand_rule: >-
+    Sempre que a mesma operação, funcionalidade ou método for cobrado mais de
+    uma vez em commits distintos dentro da mesma demanda do Redmine: (1)
+    perguntar obrigatoriamente ao usuário se a recorrência deve ser cobrada
+    novamente (1 UM) ou desconsiderada ([desconsiderado] — 0 UM); (2) sugerir
+    uma justificativa técnica concisa baseada no git diff; e (3) caso aprovada
+    a nova cobrança, exigir a inclusão explícita de '(Justificativa: <motivo
+    resumido da nova alteração>)' no item correspondente.
+  hunk_deduplication_rule: >-
+    Múltiplas alterações (vários hunks de diff) dentro da mesma unidade
+    elementar/método ou dentro do mesmo arquivo de configuração/template no
+    mesmo escopo contam como 1 única Unidade de Medida (1 UM).
+  category_plus_um_comparison_rule: >-
+    Na auditoria entre o faturamento previsto (GitLab) e o realizado (Redmine),
+    o confronto é realizado estritamente em nível de Categoria (tag) +
+    Quantidade de Unidades de Medida (UM), e não apenas no total consolidado de
+    UST. Divergências de categoria ou de quantidade de UMs devem ser apontadas
+    como Disparidade mesmo quando a soma total de UST coincidir.
+  redmine_100_percent_billed_criteria: >-
+    Uma tarefa no Redmine só é considerada '100% Cobrada/Regular' quando atende
+    cumulativamente a 3 requisitos: (1) Status Fechado/Concluído (Fechada,
+    Resolvida, Validação ou Validação com Ressalvas); (2) Comentário/evidência
+    formal contendo a descrição e o hash do commit (quando aplicável); e (3)
+    Horas lançadas maiores que zero (spent_hours > 0). Se estiver fechada e com
+    texto de cobrança mas tiver 0.0h lançadas, classificar como 'PENDENTE DE HORAS'.
+  cast_13_2024_complexity_tiers_rule: >-
+    No Catálogo Cast (13/2024), as atividades de desenvolvimento escalonadas por
+    volume de unidades elementares possuem duas faixas no Redmine: (a) faixa
+    '- 3 ou menos unidades' (Complexidade Altíssima = Não), que aplica o valor
+    base de UST por UM (ex.: [backend] = 4 UST/UM, [backend-alteracao] = 2 UST/UM,
+    [teste-unitario] = 4 UST/UM, [teste-unitario-alteracao] = 2 UST/UM,
+    [frontend] = 4 UST/UM, [frontend-alteracao] = 1 UST/UM); e (b) faixa
+    '- 4 ou mais unidades' (Complexidade Altíssima = Sim, aplicável quando a
+    quantidade validada de UMs é >= 4 nas categorias que possuem escalonamento
+    por volume CRUD/unidades), que dobra o multiplicador de UST por UM (2x base,
+    ex.: [backend] passa de 4 para 8 UST/UM, totalizando 32 UST para 4 UMs).
+    Sempre verificar se a faixa selecionada no campo 'Catálogo (Cast - 13/2024)'
+    e o campo 'Complexidade Altíssima' condizem com a quantidade correta de UMs.
+  unit_test_coverage_counting_rule: >-
+    Em [teste-unitario] e [teste-unitario-alteracao], aplica-se a regra de
+    '1 UM de teste por item/funcionalidade cobrada que o teste cobre' (o conceito
+    de 'funcionalidade coberta' do catálogo aplicado à mesma contagem das
+    unidades elementares do código). É vedado contar por classe de teste ou
+    separar testes da mesma operação por camada arquitetural (ex.: ControllerTest,
+    ServiceTest e RepositoryTest que testam a mesma rota/consulta de filtro
+    contam juntos como 1 única UM). Ajustes em classes de apoio de teste,
+    fixtures, mocks ou adaptação de testes existentes não contam UM à parte.
+  same_delivery_cycle_no_double_alteration_rule: >-
+    Regra da alteração dupla na mesma entrega: o que é modificado ou refatorado
+    (ex.: adição de paginação, ajuste de assinatura/DTO) sobre código criado
+    dias antes na mesma demanda-mãe e no mesmo ciclo de entrega — antes que a
+    tarefa de criação tenha sido validada/homologada — faz parte da própria
+    criação ([backend] / [frontend]) e NÃO pode ser cobrado separadamente como
+    [backend-alteracao] ou [frontend-alteracao]. Indícios objetivos: (1) a
+    subtarefa de alteração incide sobre métodos recém-criados em outra subtarefa
+    da mesma demanda ainda não validada; (2) no commit do módulo base/common os
+    métodos ditos 'alterados' surgem no diff já em sua versão final como métodos
+    novos; (3) as horas da tarefa de alteração foram lançadas na mesma data do
+    commit de criação. Nesses casos, recomendar zerar a tarefa de alteração
+    (Status = Resolvida, Catálogo vazio, UM = 0) e consolidar as horas e o link
+    do commit final na tarefa de criação (indicando alternativa apenas se houver
+    comprovação formal de novo requisito solicitado após a entrega inicial).
+  single_catalog_per_subtask_rule: >-
+    Cada subtarefa do Redmine deve conter itens de um único código de catálogo.
+    É vedado misturar na mesma subtarefa unidades de criação ([frontend] ou
+    [backend]) com unidades de alteração ([frontend-alteracao] ou
+    [backend-alteracao]). Quando uma entrega/nota contiver ambos, manter na
+    subtarefa atual apenas as UMs da categoria principal e recomendar a abertura
+    de uma subtarefa irmã (mesma demanda-mãe) para a outra categoria, dividindo
+    as horas apontadas entre elas.
+  lean_task_note_format_rule: >-
+    Orientação dos Fiscais de Contrato (Sr. Edilson) para lançamento de tarefas
+    no Redmine: as informações devem ser o mais enxutas possível. Formato padrão:
+    Link do Commit no topo (*Commit*: <url>); cada Unidade Elementar em bloco
+    individual (*Unidade elementar N*) separado por linha divisória (---); resumo
+    objetivo do entregável (*Comportamento entregue*: <resumo>); caminho completo do
+    arquivo com barras '/' (*Arquivo*: <caminho>); nome do método (*Método*: <metodo>);
+    e para atividades de alteração ([*-alteracao]), inclusão obrigatória do número/intervalo
+    de linhas (*Linhas*: X a Y). Para atividades de inclusão de novos arquivos/métodos,
+    a indicação de linhas é opcional/dispensável para manter o registro enxuto.
+  note_and_metadata_consistency_rule: >-
+    Auditoria obrigatória de consistência formal: (1) Caminhos de arquivos
+    citados na nota devem coincidir exatamente com o new_path do git diff (sem
+    omitir pastas intermediárias e usando '/' em vez de '\'); (2) A nota deve
+    seguir o padrão enxuto acordado com a fiscalização (orientação Sr. Edilson),
+    contendo 1 seção 'Unidade elementar N' individualizada por cada UM cobrada no
+    campo 'Unid. Medida (Cast)', indicando método, linhas (obrigatórias para alterações)
+    e link do commit; (3) Código que injeta serviço simulado/mockado (ex.: *Simulado,
+    *Mock) em vez da integração REST real não conclui a entrega de [frontend]/[backend]
+    (manter 'Em andamento' até o commit com o serviço real); (4) O campo 'Sistema (Módulo)'
+    deve condizer com o repositório do commit ('(Serviços)' para *-service/*-common
+    e '(Mobile)' para *-mobile); e (5) A tag entre colchetes no título da tarefa
+    deve coincidir com o item selecionado no campo 'Catálogo (Cast - 13/2024)'.
+  evidence_classification_levels:
+    EVIDENCIA_VERIFICADA: >-
+      O entregável exigido no campo 'deliverable' foi integralmente comprovado
+      nas fontes primárias (ex.: commit/diff compatível no GitLab ou documento/registro
+      formal no Redmine) com vínculo inequívoco à tarefa.
+    INFERENCIA_TECNICA: >-
+      Existem indícios técnicos da execução (ex.: commits do mesmo autor e
+      período afetando os módulos esperados, ou descrição parcial), mas falta
+      vínculo formal explícito ou detalhamento completo da métrica multiplicadora.
+    INFORMACAO_AUSENTE: >-
+      O entregável obrigatório (Produto), o código-fonte no repositório, a
+      métrica quantitativa (ex.: quantidade de CRUDs, critérios de aceitação,
+      horas ou tabelas) ou a autorização prévia exigida não foram localizados.
+
+crud_and_elementary_units_agreement:
+  description: >-
+    Entendimento formal acordado entre Economia e CAST sobre as definições de
+    operações CRUD e Unidades Elementares referenciadas no catálogo, combinado
+    com a taxonomia técnica de itens desconsiderados ([desconsiderado] — 0 UM).
+  must_be_counted: >-
+    Além das operações elementares CRUD principais, DEVEM SER CONTABILIZADAS
+    quaisquer outras Operações/Ações/Unidades Elementares acessórias que
+    agreguem valor ao negócio, que possuam coesão (responsabilidade única e bem
+    definida) e que não sejam responsabilidade da Unidade Elementar CRUD
+    principal em questão.
+  cross_catalog_warning: >-
+    CUIDADO: Essas operações acessórias que agregam valor ao negócio podem não
+    ser do mesmo item de catálogo. Nestes casos, novas tarefas do Redmine devem
+    ser criadas (ou propostas) e classificadas com o item de catálogo
+    correspondente.
+  must_not_be_counted:
+    general_principle: >-
+      NÃO DEVEM SER CONTABILIZADOS métodos auxiliares que não agreguem valor ao
+      negócio, que correspondam apenas a fragmentações da implementação (quebra
+      de um método coeso em partes, a critério do desenvolvedor) de uma única
+      funcionalidade/unidade elementar, ou que se constituam apenas em
+      elementos de código/arquiteturais obrigatórios para o correto
+      funcionamento da operação/ação que está sendo entregue.
+    explicit_exclusions:
+      - "Getters;"
+      - "Setters;"
+      - "Métodos em diferentes camadas apenas com função de delegar a ação para outras camadas (Controller, Service, DAO);"
+      - "Criações de classes .java cujas operações/ações já sejam contabilizadas;"
+      - "Criações de arquivos .css e .xhtml (estrutura inicial da tela – incluso no catálogo tela);"
+      - "Criações de arquivos .js (inclusos no catálogo do Frontend)."
+  disregarded_code_patterns:
+    - category: "Formatação e Reflow Puro ([desconsiderado] — 0 UM)"
+      rule: >-
+        Alterações restritas a espaços em branco, indentação, quebras de linha
+        (reflow de assinatura ou instruções), concatenação de literais quebrados
+        em linhas, linhas em branco, imports ou comentários.
+    - category: "Boilerplate e Convenção de Linguagem ([desconsiderado] — 0 UM)"
+      rule: >-
+        Getters (get*, is* sem regra de negócio), setters (set*), toString,
+        equals, hashCode, compareTo, canEqual, clone, valueOf, values,
+        construtores simples de atribuição/injeção, DTOs/Projections puros e
+        constantes simples em classes não-enum.
+    - category: "Limpeza, Reset ou Inicialização Mecânica de Estado/UI ([desconsiderado] — 0 UM)"
+      rule: >-
+        Métodos/funções (ex.: limpaCampos, pararHeartbeat, reset, init, clear)
+        cujo corpo realiza exclusivamente atribuição de valores vazios/escalares
+        (null, 0, '', false, [], {}), limpeza de timers (clearInterval,
+        clearTimeout) ou manipulação visual básica (val(''), hide(), show(),
+        empty(), prop('disabled')) sem regra de negócio, sem chamada HTTP/AJAX
+        e sem persistência.
+    - category: "Delegação entre Camadas, Extração Interna e Null-Check Simples ([desconsiderado] — 0 UM)"
+      rule: >-
+        Métodos em Controller/Service/DAO que apenas repassam parâmetros para
+        outra camada, fragmentação de método existente em submétodo privado ou
+        sobrecarga ('trocar seis por meia-dúzia') e adição exclusiva de guarda
+        simples de nulidade (if (x != null)) sem alteração da lógica de domínio.
+    - category: "Diagnóstico e Log Puro ([desconsiderado] — 0 UM)"
+      rule: >-
+        Métodos ou alterações restritas exclusivamente a instruções de log
+        (logger.*, console.*, System.out.*).
+    - category: "Troca Exclusiva de Tipo de Coleção/Instanciação Local ([desconsiderado] — 0 UM)"
+      rule: >-
+        Substituição unicamente da classe de coleção/objeto instanciada em
+        variável local (ex.: LinkedList<> para ConcurrentLinkedQueue<>) ou troca
+        de DTO/mapper de retorno sem mudança na lógica da operação.
+    - category: "Widgets/Componentes Visuais Puramente Estáticos, Gatilhos de 1 Linha e Serviços Simulados ([desconsiderado] — 0 UM)"
+      rule: >-
+        No Frontend/Mobile (Flutter, Web, etc.), NÃO contam UM: (1) funções
+        gatilho de 1 linha (ex.: verMais, verMenos, aplicarFiltro, limparFiltro)
+        que apenas delegam chamada ao método principal do controller; (2) páginas
+        ou widgets que apenas disparam a carga inicial no initState e repassam
+        callbacks, ou cards/cabeçalhos/botões puramente visuais de exibição e
+        estilo sem lógica condicional própria (ex.: botões desativados, links de
+        navegação simples); (3) modelos de dados (fromJson/toJson/copyWith/==),
+        interfaces de serviço, mappers de URL/query params, módulos de injeção de
+        dependência (DI/rotas); e (4) classes de serviço simuladas/mockadas
+        (ex.: *ServiceSimulado) com dados fixos em memória.
+
+sections:
+  - id: "sessao-1"
+    number: 1
+    title: "SESSÃO 1 - ATIVIDADES DE DESIGN e UX"
+    description: "Atividades relacionadas à elaboração de protótipos, wireframes e ativos visuais/vetoriais de interface."
+
+  - id: "sessao-2"
+    number: 2
+    title: "SESSÃO 2 - ATIVIDADES DE ANÁLISE E PROJETO"
+    description: "Atividades de gestão de backlog, modelagem de dados, cerimônias ágeis, especificação de histórias de usuário, planejamento, arquitetura e avaliação de squads."
+
+  - id: "sessao-3"
+    number: 3
+    title: "SESSÃO 3 - ATIVIDADES DE DESENVOLVIMENTO E IMPLANTAÇÃO"
+    description: "Atividades de codificação backend/frontend, testes unitários e funcionais, relatórios, análise de problemas, deploy, configuração de ambientes/componentes e scripts de banco."
+
+  - id: "sessao-4"
+    number: 4
+    title: "SESSÃO 4 - ATIVIDADES DE SUPORTE E DOCUMENTAÇÃO"
+    description: "Atividades de registro de demandas, suporte técnico, manuais, documentação auxiliar, pareceres técnicos, liberação de acessos, treinamentos e reuniões."
+
+activities:
+  # ===========================================================================
+  # SESSÃO 1 - ATIVIDADES DE DESIGN e UX
+  # ===========================================================================
+  - id: "prototipo"
+    tag: "[Protótipo]"
+    tag_aliases:
+      - "[Protótipo]"
+      - "[Prototipo]"
+      - "[prototipo]"
+      - "[protótipo]"
+    title: "Elaboração de protótipo ou wireframe"
+    section_id: "sessao-1"
+    description: >-
+      Desenvolvimento de protótipo não funcional, exibindo como as informações
+      devem estar organizadas, quais serão os componentes visuais, as cores, a
+      tipografia e imagens que estarão dispostos em uma tela de sistema.
+    professional_profile: "Time de Desenvolvimento"
+    deliverable: "Protótipo de tela em arquivo no formato PDF. Outros formatos podem ser requeridos."
+    unit_of_measure: "Por tela"
+    ust:
+      base_value: 4
+      warranty_value: null
+      raw_text: "4"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_telas"
+      formula_description: "UST_total = 4 * quantidade_telas"
+    complexity_rules:
+      - level: "Alta"
+        condition: "para telas com 10 a 15 itens de interação"
+        metric: "itens_interacao_por_tela"
+        threshold_description: "10 <= itens_interacao <= 15"
+      - level: "Altíssima"
+        condition: "para telas com mais de 15 itens de interação"
+        metric: "itens_interacao_por_tela"
+        threshold_description: "itens_interacao > 15"
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Arquivo de protótipo em formato PDF (ou outro formato requerido) anexado ou vinculado à tarefa"
+        - "Identificação da quantidade de telas prototipadas"
+      llm_audit_checklist:
+        - "Verificar se o arquivo do protótipo (PDF ou formato requisitado) consta como entregável."
+        - "Contabilizar o número de telas distintas efetivamente prototipadas."
+        - "Caso seja alegada complexidade Alta ou Altíssima, verificar a contagem de itens de interação na tela (10-15 ou >15)."
+
+  - id: "imagem"
+    tag: "[Imagem]"
+    tag_aliases:
+      - "[Imagem]"
+      - "[imagem]"
+    title: "Elaboração de ícone ou imagem vetorial"
+    section_id: "sessao-1"
+    description: >-
+      Produção de ícone ou imagem vetorial, com base nas especificações de
+      formato e tamanho, elaborado a partir de fontes preexistentes livres de
+      direitos autorais, ou de uso formalmente autorizado, ou por meio do
+      design criativo.
+    professional_profile: "Time de Desenvolvimento"
+    deliverable: "Ícone ou imagem vetorial disponibilizadas nos formatos PNG, JPG e SVG."
+    unit_of_measure: "Único"
+    ust:
+      base_value: 2
+      warranty_value: null
+      raw_text: "2"
+      calculation_type: "fixed_unique"
+      block_size: null
+      unit_parameter: "entrega_unica"
+      formula_description: "UST_total = 2 (valor fixo por entrega única da atividade)"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "when_applicable"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "gitlab_commits_diffs"
+      expected_artifacts:
+        - "Arquivos de imagem/ícone disponibilizados nos formatos PNG, JPG e/ou SVG"
+      llm_audit_checklist:
+        - "Confirmar a entrega dos ativos nos formatos especificados (PNG, JPG, SVG) na issue ou incorporados ao repositório."
+        - "Aplicar valor único de 2 UST conforme unidade de medida 'Único'."
+
+  # ===========================================================================
+  # SESSÃO 2 - ATIVIDADES DE ANÁLISE E PROJETO
+  # ===========================================================================
+  - id: "backlog"
+    tag: "[Backlog]"
+    tag_aliases:
+      - "[Backlog]"
+      - "[backlog]"
+    title: "Backlog"
+    section_id: "sessao-2"
+    description: >-
+      Com base nas informações iniciais de requisitos e funcionalidades
+      levantadas pela atividade de análise, organizar e priorizar o backlog
+      geral do produto. Ainda, com base no backlog do produto, organizar,
+      priorizar e aprovar com o negócio as tarefas que serão desenvolvidas
+      durante o sprint. Essa atividade é recorrente a cada ciclo iterativo
+      conhecido como sprint.
+    professional_profile: "Analista - Product Owner (PO)"
+    deliverable: "Backlog do produto e da sprint organizado, priorizado e aprovado com a área de negócio (até 7 user-stories ou demandas de sustentação)."
+    unit_of_measure: "Para até 7 user-stories ou demandas de sustentação."
+    ust:
+      base_value: 16
+      warranty_value: null
+      raw_text: "16"
+      calculation_type: "per_block"
+      block_size: 7
+      unit_parameter: "bloco_ate_7_user_stories_ou_demandas"
+      formula_description: "UST_total = 16 para até 7 user-stories ou demandas de sustentação organizadas/priorizadas na sprint"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para backlog contendo três ou mais atividades de user-story com mais de 10 critérios de aceitação cada."
+        metric: "user_stories_com_mais_de_10_criterios"
+        threshold_description: "quantidade_user_stories_com_mais_de_10_criterios >= 3"
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+      expected_artifacts:
+        - "Registro no Redmine das user-stories ou demandas de sustentação priorizadas para a sprint"
+        - "Evidência de aprovação/priorização junto ao negócio"
+      llm_audit_checklist:
+        - "Verificar se a atividade foi executada no contexto de planejamento/organização de ciclo iterativo (sprint)."
+        - "Conferir a listagem de user-stories ou demandas de sustentação associadas."
+        - "Para complexidade Altíssima, verificar se ao menos 3 user-stories possuem mais de 10 critérios de aceitação cada."
+
+  - id: "modelo"
+    tag: "[Modelo]"
+    tag_aliases:
+      - "[Modelo]"
+      - "[modelo]"
+    title: "Modelo de dados"
+    section_id: "sessao-2"
+    description: "Análise e desenho das entidades do sistema e seus relacionamentos."
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Arquivo em PDF e PNG. Contendo diagrama de Classes em padrão UML ou
+      diagrama equivalente como Diagrama de Entidade Relacionamento DER que
+      descreva as entidades do sistema e seus relacionamentos.
+    unit_of_measure: "Número de classes de objeto."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 por classe ou entidade."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_classes_ou_entidades"
+      formula_description: "UST_total = 1 * quantidade_classes_ou_entidades"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para modelos com mais de 10 objetos."
+        metric: "quantidade_objetos_modelo"
+        threshold_description: "quantidade_classes_ou_entidades > 10"
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Diagrama UML de Classes ou DER anexado em formato PDF e PNG"
+        - "Relação explícita das classes/entidades modeladas"
+      llm_audit_checklist:
+        - "Verificar a presença dos arquivos em PDF e PNG contendo o diagrama UML ou DER."
+        - "Contar o número exato de classes de objeto ou entidades representadas para multiplicar por 1 UST."
+        - "Verificar se o modelo possui mais de 10 objetos caso seja declarada complexidade Altíssima."
+
+  - id: "sprint-review-restrospective"
+    tag: "[sprint-review-restrospective]"
+    tag_aliases:
+      - "[sprint-review-restrospective]"
+      - "[sprint-review-retrospective]"
+      - "[Sprint-review-restrospective]"
+      - "[Sprint-review-retrospective]"
+    title: "Sprint review-retrospective"
+    section_id: "sessao-2"
+    description: >-
+      Essa atividade, única por participante da contratada na sprint, inclui a
+      realização da reunião de revisão (Sprint Review) onde o produto é
+      inspecionado regularmente para ser adaptado, após isso o time deve
+      verificar as lições aprendidas para melhorar o processo. Na mensuração
+      dessa atividade foi levado em conta a experiência do órgão com as
+      cerimônias e as recomendações do scrum guide, para sprint reviews e
+      sprint retrospective.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Descrição da reunião de revisão, incluindo participantes, assunto da
+      review e resumo das lições aprendidas.
+    unit_of_measure: "Por participante da contratada"
+    ust:
+      base_value: 4
+      warranty_value: null
+      raw_text: "4."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_participantes_contratada"
+      formula_description: "UST_total = 4 * quantidade_participantes_contratada (única por participante da contratada na sprint)"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+        - "redmine_attachment"
+      expected_artifacts:
+        - "Descrição/ata da reunião contendo lista nominal de participantes da contratada, pauta/assunto da review e resumo das lições aprendidas"
+      llm_audit_checklist:
+        - "Verificar se constam os três elementos obrigatórios do Produto: (1) participantes, (2) assunto da review e (3) resumo das lições aprendidas."
+        - "Confirmar que a contagem considera apenas uma ocorrência por participante da contratada na respectiva sprint."
+
+  - id: "user-story"
+    tag: "[user-story]"
+    tag_aliases:
+      - "[user-story]"
+      - "[User-story]"
+      - "[User-Story]"
+    title: "Especificação de funcionalidade por meio de História do Usuário (user story)."
+    section_id: "sessao-2"
+    description: "Descrição textual de funcionalidade no formato de história do usuário."
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: "Documento História de Usuário registrada no Redmine."
+    unit_of_measure: "Por critério de aceitação"
+    ust:
+      base_value: 2
+      warranty_value: null
+      raw_text: "2 por critério de aceitação."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_criterios_aceitacao"
+      formula_description: "UST_total = 2 * quantidade_criterios_aceitacao"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para user-story contendo mais de 20 critérios de aceitação."
+        metric: "criterios_aceitacao_por_user_story"
+        threshold_description: "quantidade_criterios_aceitacao > 20"
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+        - "redmine_attachment"
+      expected_artifacts:
+        - "História de Usuário formalmente registrada no Redmine"
+        - "Lista explícita e enumerada de critérios de aceitação na tarefa"
+      llm_audit_checklist:
+        - "Verificar se a funcionalidade está descrita no formato de História de Usuário no Redmine."
+        - "Contar individualmente os critérios de aceitação válidos e distintos registrados na issue."
+        - "Em caso de alteração de História de Usuário / documento preexistente, contabilizar apenas os critérios efetivamente adicionados ou alterados (e não o documento inteiro novamente)."
+        - "Multiplicar a quantidade verificada de critérios de aceitação por 2 UST."
+
+  - id: "plano-trabalho"
+    tag: "[plano-trabalho]"
+    tag_aliases:
+      - "[plano-trabalho]"
+      - "[Plano-trabalho]"
+    title: "Elaborar plano de trabalho"
+    section_id: "sessao-2"
+    description: "Elaboração de plano de trabalho para atividades demandadas."
+    professional_profile: "Analista de Sistemas."
+    deliverable: "Plano de trabalho."
+    unit_of_measure: "2 USTs para cada 80 USTs planejadas."
+    ust:
+      base_value: 2
+      warranty_value: null
+      raw_text: "2."
+      calculation_type: "per_block"
+      block_size: 80
+      unit_parameter: "total_usts_planejadas"
+      formula_description: "UST_total = 2 USTs para cada bloco de 80 USTs planejadas"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+        - "redmine_attachment"
+      expected_artifacts:
+        - "Documento de Plano de Trabalho contendo o detalhamento e o total de USTs planejadas para as demandas"
+      llm_audit_checklist:
+        - "Verificar a existência do documento de Plano de Trabalho."
+        - "Conferir o somatório de USTs planejadas no plano para validar a proporção de 2 USTs a cada 80 USTs planejadas."
+
+  - id: "arquitetura"
+    tag: "[arquitetura]"
+    tag_aliases:
+      - "[arquitetura]"
+      - "[Arquitetura]"
+    title: "Elaboração do Desenho/Arquitetura da solução."
+    section_id: "sessao-2"
+    description: >-
+      Analisar e construir a arquitetura da solução. Como os componentes
+      principais da solução estarão organizados, pode incluir componentes de
+      software, servidores, serviços, interfaces, protocolos bem como o fluxo
+      de atividades e interação entre os componentes.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Diagrama contendo a arquitetura da solução apresentada em formato PDF ou
+      PNG. Outros formatos podem ser requeridos.
+    unit_of_measure: "Único"
+    ust:
+      base_value: 36
+      warranty_value: null
+      raw_text: "36"
+      calculation_type: "fixed_unique"
+      block_size: null
+      unit_parameter: "entrega_unica"
+      formula_description: "UST_total = 36 (valor único por desenho/arquitetura da solução)"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para sistemas envolvendo complexidade arquitetural alta como integração com sistemas distribuídos."
+        metric: "complexidade_arquitetural"
+        threshold_description: "Envolve integração com sistemas distribuídos ou alta complexidade arquitetural comprovada"
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Diagrama de arquitetura da solução em formato PDF ou PNG (ou formato requerido)"
+        - "Representação dos componentes, serviços, servidores, interfaces, protocolos e fluxos de interação"
+      llm_audit_checklist:
+        - "Confirmar a entrega do diagrama arquitetural em PDF/PNG."
+        - "Avaliar se o diagrama contempla de fato a arquitetura da solução (componentes, serviços, protocolos e fluxos) e não apenas um diagrama simples de entidade."
+
+  - id: "avaliacao-squad"
+    tag: "[avaliacao-squad]"
+    tag_aliases:
+      - "[avaliacao-squad]"
+      - "[avaliação-squad]"
+      - "[Avaliacao-squad]"
+    title: "Elaboração de documento de avaliação de squad"
+    section_id: "sessao-2"
+    description: >-
+      Acompanhar as squads, avaliar e preencher os itens de agilidade conforme
+      critérios estabelecidos pela contratada. Requer autorização prévia.
+    professional_profile: "Agile Coach"
+    deliverable: "Documento de avaliação de squads"
+    unit_of_measure: "Único"
+    ust:
+      base_value: 36
+      warranty_value: null
+      raw_text: "36"
+      calculation_type: "fixed_unique"
+      block_size: null
+      unit_parameter: "entrega_unica"
+      formula_description: "UST_total = 36 (mediante autorização prévia comprovada)"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: true
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Documento preenchido de avaliação de squads"
+        - "Registro formal de autorização prévia para execução da atividade"
+      llm_audit_checklist:
+        - "OBRIGATÓRIO: Verificar se existe evidência explícita de autorização prévia. Sem autorização prévia, sinalizar como INFORMACAO_AUSENTE."
+        - "Confirmar a entrega do documento de avaliação contendo os critérios de agilidade avaliados."
+
+  # ===========================================================================
+  # SESSÃO 3 - ATIVIDADES DE DESENVOLVIMENTO E IMPLANTAÇÃO
+  # ===========================================================================
+  - id: "backend"
+    tag: "[backend]"
+    tag_aliases:
+      - "[backend]"
+      - "[Backend]"
+      - "[back-end]"
+    title: "Criação de funcionalidade no backend do sistema."
+    section_id: "sessao-3"
+    description: >-
+      Envolve a criação completa da funcionalidade no lado servidor. Conforme
+      entendimento acordado entre Economia e CAST, contabilizam-se as Unidades
+      Elementares CRUD criadas, as Operações/Ações/Unidades Elementares
+      acessórias que agreguem valor ao negócio e possuam coesão (responsabilidade
+      única e bem definida, que não sejam responsabilidade da Unidade Elementar
+      CRUD principal), além da regra de criação de Enum (1 UM por commit,
+      independentemente se foram criados 1 ou 10 enums no mesmo commit).
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Código da implementação incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Quantidade de operações CRUD / Unidades Elementares de negócio criadas (+ máximo 1 UM por commit para criação de Enums)."
+    ust:
+      base_value: 4
+      high_complexity_value: 8
+      warranty_value: 0
+      raw_text: "4 (faixa '3 ou menos unidades') ou 8 (faixa '4 ou mais unidades')"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_unidades_elementares_backend_criadas"
+      formula_description: "Se UM <= 3 (faixa '3 ou menos'): UST_total = 4 * UM. Se UM >= 4 (faixa '4 ou mais' / Complexidade Altíssima): UST_total = 8 * UM."
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para atividades com 4 unidades elementares CRUD."
+        metric: "unidades_elementares_crud"
+        threshold_description: "quantidade_unidades_elementares >= 4"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Commits e diffs no GitLab comprovando a criação de operações CRUD ou operações acessórias coesas que agregam valor ao negócio no servidor"
+      llm_audit_checklist:
+        - "Aplicar o entendimento acordado Economia/CAST: contabilizar Unidades Elementares CRUD principais e Operações/Ações acessórias coesas que agreguem valor ao negócio."
+        - "FAIXA DE COMPLEXIDADE CAST 13/2024: Se UM <= 3, aplicar 4 UST/UM (faixa '3 ou menos unidades', Complexidade Altíssima = Não). Se UM >= 4, aplicar 8 UST/UM (faixa '4 ou mais unidades', Complexidade Altíssima = Sim)."
+        - "ATENÇÃO: Caso uma operação acessória pertença a outro item de catálogo (ex.: [frontend], [Script], [Componente]), alertar que deve ser classificada em tarefa separada com o item de catálogo correspondente."
+        - "REGRA DE ENUM: Se um mesmo commit criar 1, 2 ou 10 enums, contabilizar SOMENTE 1 UM no commit para o conjunto de enums criados."
+        - "NÃO CONTABILIZAR (0 UM / [desconsiderado]): Getters, Setters, constantes de rota, interfaces, classes Documentable/Swagger, métodos em diferentes camadas apenas para delegar ação (Controller -> Service -> DAO), handlers de exceção que fazem parte da operação principal, criação de classes .java cujas ações já foram contabilizadas, fragmentação de método coeso em partes menores, formatação pura, logs puros ou criação de arquivos .css/.xhtml/.js."
+        - "Conferir se o campo 'Sistema (Módulo)' está preenchido como '(Serviços)' e se todos os commits envolvidos (ex.: service + common) estão citados na nota."
+        - "Verificar se a demanda não decorre de erro em garantia (custo = 0 UST)."
+
+  - id: "backend-alteracao"
+    tag: "[backend-alteracao]"
+    tag_aliases:
+      - "[backend-alteracao]"
+      - "[backend-alteração]"
+      - "[Backend-alteracao]"
+    title: "Alteração ou reuso de funcionalidade no backend do sistema."
+    section_id: "sessao-3"
+    description: >-
+      Envolve a alteração de funcionalidade no lado servidor ou o reuso de
+      funcionalidade ou serviço similar no sistema. Segue o entendimento
+      acordado entre Economia e CAST para Unidades Elementares CRUD e operações
+      acessórias coesas de negócio, bem como a regra de alteração de Enum (1 UM
+      por commit, independentemente se foram alterados 1 ou 10 enums no mesmo
+      commit).
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Código da implementação incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Quantidade de operações CRUD / Unidades elementares CRUD associadas (+ máximo 1 UM por commit para alteração de Enums)."
+    ust:
+      base_value: 2
+      high_complexity_value: 4
+      warranty_value: 0
+      raw_text: "2 (faixa '3 ou menos unidades') ou 4 (faixa '4 ou mais unidades')"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_unidades_elementares_backend_alteradas"
+      formula_description: "Se UM <= 3 (faixa '3 ou menos'): UST_total = 2 * UM. Se UM >= 4 (faixa '4 ou mais' / Complexidade Altíssima): UST_total = 4 * UM."
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para atividades com 4 unidades elementares CRUD."
+        metric: "unidades_elementares_crud"
+        threshold_description: "quantidade_unidades_elementares >= 4"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Commits e diffs no GitLab comprovando modificação ou reuso de operações CRUD ou unidades elementares coesas de negócio no servidor"
+      llm_audit_checklist:
+        - "Aplicar o entendimento acordado Economia/CAST: contabilizar apenas alterações/reusos em Unidades Elementares CRUD ou operações acessórias coesas que agreguem valor ao negócio."
+        - "REGRA DA ALTERAÇÃO DUPLA NA MESMA ENTREGA: Verificar se os métodos ditos 'alterados' foram criados dias antes em outra subtarefa da mesma demanda-mãe ainda não validada, ou se no commit do módulo common eles já aparecem como métodos novos, ou se as horas estão lançadas na data do commit de criação. Caso positivo, recomendar zerar a tarefa (Catálogo vazio, UM = 0) pois alterações anteriores à entrega final fazem parte da criação."
+        - "REGRA DE ENUM: Se um mesmo commit alterar 1, 2 ou 10 enums (ou várias constantes/métodos de enums), contabilizar SOMENTE 1 UM por commit."
+        - "NÃO CONTABILIZAR (0 UM / [desconsiderado]): Getters, Setters, delegação pura entre camadas (Controller/Service/DAO), troca apenas do DTO/mapper de retorno, métodos citados na nota que não sofreram diff real no commit, extração interna de método ('trocar seis por meia-dúzia'), checagem simples de null, logs puros, formatação/reflow ou troca simples de tipo de coleção local."
+        - "Conferir se a tag do título da tarefa é '[Backend-Alteração]' (e não '[Backend]') para evitar divergência com o campo Catálogo."
+        - "Caso seja correção de defeito em período de garantia da contratada, aplicar regra de garantia (0 UST)."
+
+  - id: "teste-unitario"
+    tag: "[teste-unitario]"
+    tag_aliases:
+      - "[teste-unitario]"
+      - "[[teste-unitario]"
+      - "[teste-unitário]"
+      - "[Teste-unitario]"
+    title: "Criação de teste automatizado de back-end."
+    section_id: "sessao-3"
+    description: "Envolve a criação completa de teste de unidade cobrindo funcionalidade de back-end (ou módulo Mobile/Frontend com precedente aceito no projeto)."
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Código da implementação do teste incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Quantidade de funcionalidade coberta (1 UM de teste por item/unidade elementar cobrada que o teste cobre)."
+    ust:
+      base_value: 4
+      high_complexity_value: 8
+      warranty_value: 0
+      raw_text: "4 (faixa '3 ou menos unidades')"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_funcionalidades_backend_cobertas"
+      formula_description: "UST_total = 4 * quantidade_itens_cobrados_cobertos (na faixa '3 ou menos unidades')"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para teste cobrindo back-end com 4 unidades elementares CRUD."
+        metric: "unidades_elementares_crud_cobertas"
+        threshold_description: "unidades_crud_cobertas >= 4"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Arquivos de teste automatizado (ex.: *Test.java, *_test.dart, *.spec.*, *.test.*) adicionados ao repositório no GitLab"
+      llm_audit_checklist:
+        - "REGRA CENTRAL DE CONTAGEM: Contabilizar 1 UM de teste por item cobrado na tarefa de implementação que o teste cobre ('funcionalidade coberta' aplicada à mesma contagem do código)."
+        - "VEDAÇÃO DE CONTAGEM POR CAMADA/CLASSE: Se 3 arquivos de teste (ex.: ControllerTest, ServiceTest e RepositoryTest) cobrem a mesma funcionalidade/consulta (1 UM de [backend]), eles contam juntos 1 única UM de [teste-unitario]."
+        - "NÃO CONTABILIZAR À PARTE: Ajustes em classes auxiliares/fixtures de teste (ex.: ServiceControlado, ServicePaginado) ou adaptação de testes existentes não geram UM adicional."
+        - "Verificar se a nota separa 1 seção 'Unidade elementar N' para cada UM cobrada, se usa '/' nos caminhos de arquivo e se inclui o link do commit."
+        - "Quando usado em repositório Mobile/Flutter, validar normalmente e registrar observação informativa de risco baixo (o catálogo textual menciona 'back-end', mas há precedentes pagos no projeto Mobile)."
+
+  - id: "teste-unitario-alteracao"
+    tag: "[teste-unitario-alteracao]"
+    tag_aliases:
+      - "[teste-unitario-alteracao]"
+      - "[teste-unitario-alteração]"
+      - "[Teste-unitario-alteracao]"
+    title: "Alteração de teste de bac-kend."
+    section_id: "sessao-3"
+    description: "Envolve a alteração do teste de unidade cobrindo funcionalidade de back-end."
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Código da implementação do teste incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Quantidade de funcionalidade de back-end coberta"
+    ust:
+      base_value: 2
+      warranty_value: 0
+      raw_text: "2"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_funcionalidades_backend_cobertas"
+      formula_description: "UST_total = 2 * quantidade_funcionalidades_backend_cobertas"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para teste cobrindo back-end com 4 unidades elementares CRUD."
+        metric: "unidades_elementares_crud_cobertas"
+        threshold_description: "unidades_crud_cobertas >= 4"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Diffs no GitLab demonstrando atualização/manutenção de arquivos de teste de unidade existentes"
+      llm_audit_checklist:
+        - "Confirmar nos diffs do GitLab que houve modificação substancial em testes de unidade preexistentes no back-end."
+        - "Contabilizar a quantidade de funcionalidades de back-end cobertas pelos testes alterados e multiplicar por 2 UST."
+
+  - id: "relatorio"
+    tag: "[relatorio]"
+    tag_aliases:
+      - "[relatorio]"
+      - "[relatório]"
+      - "[Relatorio]"
+      - "[Relatório]"
+    title: "Elaboração de relatório em arquivo"
+    section_id: "sessao-3"
+    description: >-
+      Criação da estrutura de relatório em arquivo no formato pdf, xls ou
+      similar, aplicação de estilos e organização dos componentes conforme o
+      protótipo pré-definido. Envolve a codificação para geração do arquivo em
+      tecnologias diversas como jasper, spreadsheet, stylesheets, pdfkit ou
+      prawn.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Código da implementação incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Por relatório em arquivo elaborado."
+    ust:
+      base_value: 10
+      warranty_value: 0
+      raw_text: "10."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_relatorios_elaborados"
+      formula_description: "UST_total = 10 * quantidade_relatorios_elaborados"
+    complexity_rules:
+      - level: "Alta"
+        condition: "para relatórios contendo de 10 a 15 campos de informação."
+        metric: "quantidade_campos_informacao"
+        threshold_description: "10 <= campos_informacao <= 15"
+      - level: "Altíssima"
+        condition: "para relatórios com mais de 15 campos de informação."
+        metric: "quantidade_campos_informacao"
+        threshold_description: "campos_informacao > 15"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Commits no GitLab contendo criação de código/template de geração de relatório (ex.: Jasper/.jrxml, spreadsheet, pdfkit, prawn, etc.)"
+      llm_audit_checklist:
+        - "Verificar no GitLab a criação do código-fonte gerador do relatório em arquivo (PDF, XLS ou similar)."
+        - "Contabilizar a quantidade de novos relatórios em arquivo implementados (10 UST por relatório)."
+        - "Se declarada complexidade Alta ou Altíssima, conferir o número de campos de informação presentes no relatório (10-15 ou >15)."
+
+  - id: "relatorio-alteracao"
+    tag: "[relatorio-alteracao]"
+    tag_aliases:
+      - "[relatorio-alteracao]"
+      - "[relatório-alteração]"
+      - "[relatorio-alteração]"
+      - "[Relatorio-alteracao]"
+    title: "Alteração de relatório em arquivo"
+    section_id: "sessao-3"
+    description: >-
+      Alteração da estrutura de relatório em arquivo no formato pdf, xls ou
+      similar, aplicação de estilos e organização dos componentes conforme o
+      protótipo pré-definido. Envolve a codificação para gerção do arquivo em
+      tecnologias diversas como jasper, spreadsheet, stylesheets, pdfkit ou
+      prawn.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Código da implementação incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Por alteração em relatório em arquivo."
+    ust:
+      base_value: 6
+      warranty_value: 0
+      raw_text: "6."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_relatorios_alterados"
+      formula_description: "UST_total = 6 * quantidade_relatorios_alterados"
+    complexity_rules:
+      - level: "Alta"
+        condition: "para relatórios contendo de 10 a 15 campos de informação."
+        metric: "quantidade_campos_informacao"
+        threshold_description: "10 <= campos_informacao <= 15"
+      - level: "Altíssima"
+        condition: "para relatórios com mais de 15 campos de informação."
+        metric: "quantidade_campos_informacao"
+        threshold_description: "campos_informacao > 15"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Diffs no GitLab comprovando modificação em código/template de relatório exportável preexistente"
+      llm_audit_checklist:
+        - "Verificar nos diffs do GitLab a alteração de código gerador de relatório em arquivo (PDF, XLS ou similar)."
+        - "Aplicar 6 UST por relatório em arquivo alterado."
+
+  - id: "frontend"
+    tag: "[frontend]"
+    tag_aliases:
+      - "[frontend]"
+      - "[Frontend]"
+      - "[front-end]"
+    title: "Criação de funcionalidade de usabilidade no front end."
+    section_id: "sessao-3"
+    description: "Envolve a criação completa da funcionalidade no lado cliente."
+    professional_profile: "Desenvolvedor Web-Perfl 2.1 (full stack) ou Perfl 2.2 (front end) ou Desenvolvedor Delphi."
+    deliverable: >-
+      Código da implementação incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Quantidade de funcionalidade."
+    ust:
+      base_value: 4
+      warranty_value: 0
+      raw_text: "4 por funcionalidade."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_funcionalidades_frontend"
+      formula_description: "UST_total = 4 * quantidade_funcionalidades_frontend_criadas"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para funcionalidades com necessidade de negócio complexa."
+        metric: "complexidade_negocio_frontend"
+        threshold_description: "Necessidade de negócio complexa devidamente justificada na tarefa e refletida no código"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Commits e diffs no GitLab demonstrando a criação completa de nova tela/componente/funcionalidade client-side"
+      llm_audit_checklist:
+        - "Analisar nos diffs do GitLab se houve criação completa de funcionalidade no lado cliente (Web ou Mobile/Flutter). Contabilizar 1 UM por item funcional novo com lógica própria (ex.: método de carga paginada/controle de estado no controller, widget com lógica condicional de estados/grade/paginação, menu de navegação com regra própria, ou enum novo com métodos de conversão = 1 UM por commit)."
+        - "NÃO CONTABILIZAR ([desconsiderado] — 0 UM): funções gatilho de 1 linha (verMais, verMenos, aplicarFiltro, limparFiltro), páginas que apenas disparam initState e repassam ao controller, widgets puramente visuais/estáticos sem lógica condicional, modelos (fromJson/toJson/copyWith), interfaces, módulos de DI/rotas, helpers que só montam URL/query params e serviços simulados/mocks (*ServiceSimulado)."
+        - "VERIFICAÇÃO DE SERVIÇO SIMULADO/MOCK: Se a tela/funcionalidade injetar serviço simulado (ex.: FormulariosServiceSimulado) em vez do serviço REST real, alertar que a entrega está incompleta e recomendar manter a tarefa 'Em andamento' até o commit que conecta o serviço real."
+        - "VEDAÇÃO DE MISTURA DE CATÁLOGOS: Se a tarefa de criação ([frontend]) também alterar método/função criada em subtarefa anterior (ex.: parametrizar carregarFormularios já existente), separar essa alteração em uma subtarefa irmã de [frontend-alteracao]."
+        - "Conferir se todos os caminhos de arquivos citados na nota batem exatamente com o new_path do diff (sem omitir pastas do módulo) e se a quantidade de seções 'Unidade elementar N' na nota coincide com o campo 'Unid. Medida (Cast)'."
+        - "Atenção para não enquadrar como [frontend] (4 UST) o que for apenas adição de filtro simples, ordenação simples, validação simples de formulário ou alteração de tela existente — tais casos pertencem a [frontend-alteracao] (1 UST)."
+
+  - id: "frontend-alteracao"
+    tag: "[frontend-alteracao]"
+    tag_aliases:
+      - "[frontend-alteracao]"
+      - "[frontend-alteração]"
+      - "[Frontend-alteracao]"
+      - "[front-end-alteracao]"
+    title: "Alteração ou reuso de funcionalidade de usabilidade no front end e adição de funcionalidade simples."
+    section_id: "sessao-3"
+    description: >-
+      Envolve a alteração de funcionalidade no lado cliente, a reutilização de
+      funcionalidade similar no sistema, ou criação de elemento simples de
+      filtro de listagem, elemento simples de ordenação e validação simples de
+      campos de formulário.
+    professional_profile: "Desenvolvedor Web-Perfl 2.1 (full stack) ou Perfl 2.2 (front end) ou Desenvolvedor Delphi."
+    deliverable: >-
+      Código da implementação incorporado ao sistema e adicionado ao
+      repositório, ou sistema de controle de versão.
+    unit_of_measure: "Quantidade de funcionalidade."
+    ust:
+      base_value: 1
+      warranty_value: 0
+      raw_text: "1 por funcionalidade."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_funcionalidades_frontend_alteradas_ou_simples"
+      formula_description: "UST_total = 1 * quantidade_funcionalidades_frontend_alteradas_ou_simples"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para funcionalidades com necessidade de negócio complexa."
+        metric: "complexidade_negocio_frontend"
+        threshold_description: "Necessidade de negócio complexa justificada"
+    validation_guidelines:
+      requires_git_evidence: "required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Commits e diffs no GitLab comprovando alteração de componente client-side, reuso ou adição de filtro/ordenação/validação simples"
+      llm_audit_checklist:
+        - "Confirmar nos diffs do GitLab a alteração de interface/função existente (ex.: evolução de método de controller criado em tarefa anterior) ou criação de filtro simples, ordenação ou validação de campos."
+        - "NÃO CONTABILIZAR ([desconsiderado] — 0 UM): ajustes puramente de formatação/indentação, funções gatilho de 1 linha (aplicarFiltro, limparFiltro), repasse de callbacks entre widgets (onFiltrar) ou funções acessórias de reset/limpeza visual sem valor de negócio."
+        - "Múltiplos hunks de alteração dentro do mesmo arquivo/componente front-end para a mesma funcionalidade contam como 1 única UM."
+
+  - id: "problema"
+    tag: "[problema]"
+    tag_aliases:
+      - "[problema]"
+      - "[Problema]"
+    title: "Verificação e registro de problema"
+    section_id: "sessao-3"
+    description: >-
+      verificação de problema em sistema por parte do desenvolvimento. A tarefa
+      pode ser aberta prontamente em caso de problema, porém se detectado que se
+      trata de garantia, então ela e as tarefas relacionadas a correção devem
+      ser tratadas como garantia, sem custo. Pode incluir realização de testes e
+      procedimentos.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Descrição textual sobre análise realizada, pode incluir testes,
+      procedimentos e conclusão.
+    unit_of_measure: "Único."
+    ust:
+      base_value: 2
+      warranty_value: 0
+      raw_text: "2 para erro que não seja da contratada, 0 para garantia."
+      calculation_type: "conditional_warranty"
+      block_size: null
+      unit_parameter: "is_garantia"
+      formula_description: "Se erro for de garantia da contratada: UST_total = 0 (inclusive tarefas de correção associadas). Se erro não for da contratada: UST_total = 2."
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para atendimento fora do horário de trabalho padrão."
+        metric: "horario_atendimento"
+        threshold_description: "Atendimento realizado fora do horário comercial/padrão"
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+      expected_artifacts:
+        - "Relato técnico detalhado no Redmine contendo a análise realizada, testes/procedimentos executados e conclusão sobre a causa-raiz"
+        - "Classificação explícita se o problema decorre ou não de garantia da contratada"
+      llm_audit_checklist:
+        - "Verificar se consta a descrição textual da análise, procedimentos/testes e conclusão na tarefa do Redmine."
+        - "CRÍTICO: Avaliar a conclusão da causa-raiz. Se o problema for defeito de responsabilidade/garantia da contratada, atribuir 0 UST a esta tarefa e também 0 UST a todas as tarefas de correção vinculadas."
+
+  - id: "deploy"
+    tag: "[deploy]"
+    tag_aliases:
+      - "[deploy]"
+      - "[Deploy]"
+    title: "Deploy de sistema"
+    section_id: "sessao-3"
+    description: >-
+      Geração de nova versão de sistema. Pode exigir seguir o plano de
+      comunicação do processo de Deploy.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Registro do deploy em ferramenta automatizada ou registro de atividades
+      realizadas por meio de ferramenta de registro de operações.
+    unit_of_measure: "Ambiente."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 por ambiente."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_ambientes"
+      formula_description: "UST_total = 1 * quantidade_ambientes"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para atendimento emergencial fora da janela de deploy."
+        metric: "janela_deploy"
+        threshold_description: "Deploy emergencial executado fora da janela ordinária de deploy"
+    validation_guidelines:
+      requires_git_evidence: "when_applicable"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "deploy_tool_log"
+        - "redmine_issue"
+        - "gitlab_commits_diffs"
+      expected_artifacts:
+        - "Evidência/log do deploy em ferramenta automatizada (CI/CD, tag de versão/release) ou registro formal na ferramenta de operações/Redmine indicando o(s) ambiente(s)"
+      llm_audit_checklist:
+        - "Verificar o registro da geração de versão/deploy e identificar em quantos ambientes distintos foi realizado."
+        - "Multiplicar a quantidade de ambientes comprovados por 1 UST."
+
+  - id: "configuracao-sistema"
+    tag: "[configuracao-sistema]"
+    tag_aliases:
+      - "[configuracao-sistema]"
+      - "[configuração-sistema]"
+      - "[Configuracao-sistema]"
+    title: "Configuração de sistema"
+    section_id: "sessao-3"
+    description: >-
+      Inclui trabalho completo de configuração, scripts e todo o trabalho
+      necessário para que a aplicação esteja funcional no ambiente de
+      homologação, produção ou outro.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: "Descrição e registro da atividade."
+    unit_of_measure: "Quantidade de ambientes"
+    ust:
+      base_value: 4
+      warranty_value: null
+      raw_text: "4 por ambiente"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_ambientes"
+      formula_description: "UST_total = 4 * quantidade_ambientes_configurados"
+    complexity_rules:
+      - level: "Altíssima"
+        condition: "para configuração de sistemas legados."
+        metric: "tipo_sistema"
+        threshold_description: "Aplicação caracterizada como sistema legado"
+    validation_guidelines:
+      requires_git_evidence: "when_applicable"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+        - "gitlab_commits_diffs"
+      expected_artifacts:
+        - "Descrição detalhada e registro da configuração realizada em cada ambiente (homologação, produção, etc.)"
+      llm_audit_checklist:
+        - "Distinguir entre [configuracao-sistema] (4 UST/ambiente — preparação completa de ambiente para a aplicação funcionar) e [Configuracao] da Sessão 4 (1 UST — liberação de acessos/perfis de usuário)."
+        - "Confirmar a descrição técnica das configurações realizadas e a quantidade de ambientes atendidos."
+
+  - id: "componente"
+    tag: "[Componente]"
+    tag_aliases:
+      - "[Componente]"
+      - "[componente]"
+    title: "Configuração ou execução de componente (Biblioteca/Rotina/Extensão)"
+    section_id: "sessao-3"
+    description: >-
+      Instalação, execução, atualização ou eventual configuração para que o
+      componente de software ou biblioteca, rotina ou extensão funcione
+      adequadamente acoplado ao sistema, ambiente ou serviço em questão.
+      Compreende descritores de implantação/container (weblogic.xml,
+      weblogic-application.xml, web.xml, log4j2.xml, pom.xml), arquivos
+      .properties (ex.: messages.properties, jasperreports.properties),
+      parametrizações de anotações de classe (@ComponentScan, @PropertySource,
+      etc.) e alterações em métodos Java restritas exclusivamente à
+      parametrização de agendamento/anotação (ex.: @Scheduled(cron = ...)) sem
+      mudança na lógica de negócio do método.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: >-
+      Descrição e registro da atividade e código adicionado ao repositório
+      quando aplicável.
+    unit_of_measure: "Quantidade de arquivos de propriedades / descritores / componentes configurados ou alterados (1 UM por arquivo/componente)."
+    ust:
+      base_value: 2
+      warranty_value: 0
+      raw_text: "2 por U.M."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_arquivos_ou_componentes"
+      formula_description: "UST_total = 2 * quantidade_arquivos_ou_componentes_configurados"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "when_applicable"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Descrição e registro da configuração/atualização do componente no Redmine"
+        - "Diff no GitLab comprovando a alteração em descritores (pom.xml, web.xml, weblogic.xml, log4j2.xml), arquivos .properties ou parametrizações de componente/agendamento"
+      llm_audit_checklist:
+        - "Contabilizar 1 UM (2 UST) por arquivo de propriedades, descritor XML/Maven ou componente configurado/alterado."
+        - "Múltiplas alterações dentro do mesmo arquivo (ex.: várias chaves adicionadas no mesmo messages.properties ou múltiplas dependências no mesmo pom.xml) no mesmo escopo contam como 1 única UM para aquele arquivo."
+        - "Caso uma alteração em classe Java limite-se apenas à parametrização de anotação (ex.: @Scheduled(cron = ...)) sem mudar a lógica de negócio, enquadrar em [Componente] (2 UST) e não em [backend-alteracao]."
+
+  - id: "script"
+    tag: "[Script]"
+    tag_aliases:
+      - "[Script]"
+      - "[script]"
+    title: "Elaboração e execução de scripts"
+    section_id: "sessao-3"
+    description: "Elaboração de script para realizar operações de CRUD diretamente no banco de dados."
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: "Script SQL; Arquivo no formato CSV (quando solicitado)."
+    unit_of_measure: "1 UST por cada 4 tabelas"
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1."
+      calculation_type: "per_block"
+      block_size: 4
+      unit_parameter: "quantidade_tabelas_banco"
+      formula_description: "UST_total = 1 UST para cada grupo de 4 tabelas manipuladas no script SQL"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "when_applicable"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "gitlab_commits_diffs"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Script SQL entregue (anexado no Redmine ou versionado no GitLab)"
+        - "Arquivo CSV de resultado/carga (quando solicitado na demanda)"
+      llm_audit_checklist:
+        - "Verificar a presença do artefato obrigatório: Script SQL (e CSV quando solicitado)."
+        - "Inspecionar o Script SQL para contar quantas tabelas distintas sofrem operações CRUD e aplicar a proporção de 1 UST a cada 4 tabelas."
+
+  - id: "teste"
+    tag: "[Teste]"
+    tag_aliases:
+      - "[Teste]"
+      - "[teste]"
+      - "[teste-funcional]"
+    title: "Teste funcional"
+    section_id: "sessao-3"
+    description: >-
+      Com base em tarefa de implementação desenvolvida e disponibilizada em
+      ambiente de homologação, realizar testes funcionais e demonstrar se os
+      resultados foram satisfatórios ou não de acordo com a(s) história(s) de
+      usuário.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: "Registro dos resultados dos testes na tarefa associada do Redmine."
+    unit_of_measure: "Por critério de aceitação ou funcionalidade."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 por critério de aceitação, ou 1 por funcionalidade."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_criterios_aceitacao_ou_funcionalidades_testadas"
+      formula_description: "UST_total = 1 * quantidade_criterios_aceitacao_testados (ou 1 * quantidade_funcionalidades_testadas)"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+        - "redmine_attachment"
+      expected_artifacts:
+        - "Registro explícito dos resultados dos testes (satisfatório/não satisfatório) documentado na tarefa associada do Redmine"
+      llm_audit_checklist:
+        - "Verificar se os resultados dos testes foram efetivamente registrados na issue do Redmine."
+        - "Confirmar a quantidade de critérios de aceitação (ou funcionalidades) comprovadamente testados e demonstrados em ambiente de homologação."
+
+  # ===========================================================================
+  # SESSÃO 4 - ATIVIDADES DE SUPORTE E DOCUMENTAÇÃO
+  # ===========================================================================
+  - id: "registro-tarefa"
+    tag: "[Registro-tarefa]"
+    tag_aliases:
+      - "[Registro-tarefa]"
+      - "[registro-tarefa]"
+    title: "Registro de ocorrências e tarefas (Itop e Redmine)"
+    section_id: "sessao-4"
+    description: >-
+      Registro de ocorrências ou solicitações em sistema de demandas,
+      normalmente para registrar uma nova demanda de usuário.
+    professional_profile: "Suporte de Software"
+    deliverable: "Relatório de registros"
+    unit_of_measure: "Registro"
+    ust:
+      base_value: 0.15
+      warranty_value: null
+      raw_text: "0,15 por registro"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_registros"
+      formula_description: "UST_total = 0.15 * quantidade_registros"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+        - "external_ticket_system"
+      expected_artifacts:
+        - "Relatório de registros de ocorrências/tarefas abertas no Itop e/ou Redmine"
+      llm_audit_checklist:
+        - "Conferir o relatório de registros apresentado e a quantidade exata de demandas registradas."
+        - "Multiplicar a quantidade de registros comprovados por 0,15 UST."
+
+  - id: "suporte"
+    tag: "[Suporte]"
+    tag_aliases:
+      - "[Suporte]"
+      - "[suporte]"
+    title: "Suporte"
+    section_id: "sessao-4"
+    description: >-
+      Identificação da solicitação do usuário, providenciando a solução ou
+      encaminhamento para outra área. Orientação e configuração de permissões de
+      acesso aos sistemas. Contabilizado por atendimento/chamado (SS / OS /
+      GLPI / Suporte) único comprovado por anexo, aplicando deduplicação
+      inteligente quando houver múltiplos arquivos/prints para o mesmo chamado.
+    professional_profile: "Suporte e Time de Desenvolvimento"
+    deliverable: >-
+      Registro de demanda, registro de eventuais interações com as áreas
+      relacionadas ou usuário demandante e anexos comprobatórios (prints
+      .PNG/.JPG ou .PDF) de cada chamado atendido.
+    unit_of_measure: "Quantidade de atendimentos / chamados (SS/OS/GLPI/Suporte) únicos comprovados por anexo (1 UM por chamado único)."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 UST por chamado (1 UM = 1 atendimento/chamado único)"
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_chamados_unicos"
+      formula_description: "UST_total = 1 * quantidade_chamados_unicos_comprovados"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Anexos de evidência (prints .PNG/.JPG ou documentos .PDF) comprovando cada atendimento/chamado realizado"
+        - "Registro da demanda e interações realizadas no Redmine"
+      llm_audit_checklist:
+        - "Verificar a presença dos anexos comprobatórios (prints ou PDFs) de cada chamado/atendimento."
+        - "DEDUPLICAÇÃO OBRIGATÓRIA: Se houver múltiplos arquivos de print/PDF referentes ao mesmo número de chamado (ex.: SS1082160_1.png e SS1082160_2.png, ou 2608100096.pdf e '2 608 100 096.PNG'), contabilizar apenas 1 UM para aquele chamado."
+        - "Calcular Total UST = Quantidade de Chamados Únicos Comprovados * 1 UST."
+
+  - id: "manual-usuario"
+    tag: "[Manual-usuário]"
+    tag_aliases:
+      - "[Manual-usuário]"
+      - "[Manual-usuario]"
+      - "[manual-usuário]"
+      - "[manual-usuario]"
+    title: "Elaboração de manual de usuário"
+    section_id: "sessao-4"
+    description: "Elaboração de manual de usuário de acordo com o padrão institucional de documentação."
+    professional_profile: "Suporte de Software"
+    deliverable: >-
+      Documentação de usuário em arquivo no formato PDF. Outros formatos podem
+      ser requeridos, incluindo conteúdo para ajuda online.
+    unit_of_measure: "História de Usuário"
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 Por História de Usuário ou Funcionalidade."
+      calculation_type: "per_unit"
+      block_size: null
+      unit_parameter: "quantidade_historias_usuario_ou_funcionalidades_documentadas"
+      formula_description: "UST_total = 1 * quantidade_historias_usuario_ou_funcionalidades_documentadas"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Arquivo de manual do usuário em formato PDF (ou formato requerido / ajuda online)"
+      llm_audit_checklist:
+        - "Verificar a entrega do manual em PDF (ou formato solicitado) aderente ao padrão institucional."
+        - "Contabilizar quantas Histórias de Usuário ou Funcionalidades foram documentadas no manual (1 UST cada)."
+
+  - id: "documento"
+    tag: "[Documento]"
+    tag_aliases:
+      - "[Documento]"
+      - "[documento]"
+    title: "Elaboração de documentação auxiliar"
+    section_id: "sessao-4"
+    description: >-
+      Elaboração de documentos diversos em apoio ao processo de desenvolvimento
+      de sistemas. Tarefa para situação de caráter excepcional. Exige
+      autorização prévia.
+    professional_profile: "A definir"
+    deliverable: >-
+      Documentação produzida em formato PDF e descrição de justificativa do
+      motivo do documento e do tempo gasto na elaboração do documento.
+    unit_of_measure: "Quantidade de horas de elaboração"
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 por hora de elaboração."
+      calculation_type: "per_hour"
+      block_size: null
+      unit_parameter: "quantidade_horas_elaboracao"
+      formula_description: "UST_total = 1 * quantidade_horas_elaboracao (mediante autorização prévia e justificativa)"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: true
+      is_exceptional: true
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Documento produzido em formato PDF"
+        - "Descrição da justificativa do motivo do documento e do tempo gasto na elaboração"
+        - "Autorização prévia formal para abertura/execução desta tarefa excepcional"
+      llm_audit_checklist:
+        - "OBRIGATÓRIO: Verificar a existência de autorização prévia por tratar-se de tarefa de caráter excepcional."
+        - "Verificar a presença simultânea dos três itens do Produto: (1) PDF do documento, (2) justificativa do motivo e (3) registro/justificativa do tempo gasto."
+
+  - id: "parecer-tecnico"
+    tag: "[Parecer-técnico]"
+    tag_aliases:
+      - "[Parecer-técnico]"
+      - "[Parecer-tecnico]"
+      - "[parecer-técnico]"
+      - "[parecer-tecnico]"
+    title: "Análise e elaboração de Parecer técnico de sistemas"
+    section_id: "sessao-4"
+    description: >-
+      Parecer técnico sobre sistema relacionado a alguma área ou disciplina da
+      engenharia de software, como arquitetura de software, segurança da
+      informação, análise de código ou documentação. Tarefa para situação de
+      caráter excepcional. Exige autorização prévia.
+    professional_profile: "Time de Desenvolvimento."
+    deliverable: "Documento de parecer técnico e outros artefatos/anexos caso necessário."
+    unit_of_measure: "Hora de análise e elaboração."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 por hora de análise e elaboração."
+      calculation_type: "per_hour"
+      block_size: null
+      unit_parameter: "quantidade_horas_analise_elaboracao"
+      formula_description: "UST_total = 1 * quantidade_horas_analise_elaboracao (mediante autorização prévia)"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: true
+      is_exceptional: true
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Documento formal de Parecer Técnico (e anexos pertinentes)"
+        - "Autorização prévia formal para realização do parecer em caráter excepcional"
+        - "Apontamento/registro das horas dedicadas à análise e elaboração"
+      llm_audit_checklist:
+        - "OBRIGATÓRIO: Verificar evidência de autorização prévia por tratar-se de atividade excepcional."
+        - "Lembrar que Parecer Técnico não é extraído de diffs de commits, mas sim de análise/diagnóstico documentado com carga horária comprovada."
+        - "Confirmar a entrega do documento de Parecer Técnico e confrontar a quantidade de horas pleiteadas com a complexidade/extensão do parecer."
+
+  - id: "configuracao"
+    tag: "[Configuracao]"
+    tag_aliases:
+      - "[Configuracao]"
+      - "[Configuração]"
+      - "[configuracao]"
+      - "[configuração]"
+    title: "Configuração de sistema e/ou perfil"
+    section_id: "sessao-4"
+    description: "Configuração de sistema como habilitação de permissões ou liberação de acessos."
+    professional_profile: "Suporte de Software."
+    deliverable: "Relatório de atividades."
+    unit_of_measure: "Único."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1."
+      calculation_type: "fixed_unique"
+      block_size: null
+      unit_parameter: "entrega_unica"
+      formula_description: "UST_total = 1 (valor único por atendimento de configuração de perfil/permissão)"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+      expected_artifacts:
+        - "Relatório/registro das atividades de habilitação de permissões ou liberação de acessos realizadas"
+      llm_audit_checklist:
+        - "Confirmar que a atividade trata de habilitação de permissões ou liberação de acessos (1 UST único), não devendo ser confundida com [configuracao-sistema] da Sessão 3 (4 UST por ambiente)."
+
+  - id: "treinamento-presencial"
+    tag: "[Treinamento-presencial]"
+    tag_aliases:
+      - "[Treinamento-presencial]"
+      - "[treinamento-presencial]"
+    title: "Realizar treinamento técnico presencial"
+    section_id: "sessao-4"
+    description: "Treinamento presencial."
+    professional_profile: "A definir."
+    deliverable: "Documento constando o plano de aula, carga horária e lista de participantes."
+    unit_of_measure: "Hora/aula."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 por hora/aula."
+      calculation_type: "per_hour"
+      block_size: null
+      unit_parameter: "quantidade_horas_aula"
+      formula_description: "UST_total = 1 * quantidade_horas_aula"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_attachment"
+        - "redmine_issue"
+      expected_artifacts:
+        - "Documento contendo: (1) plano de aula, (2) carga horária realizada e (3) lista de participantes"
+      llm_audit_checklist:
+        - "Verificar se o documento comprobatório contém todos os três requisitos obrigatórios: plano de aula, carga horária e lista de presença/participantes."
+        - "Calcular 1 UST por hora/aula comprovada."
+
+  - id: "reuniao"
+    tag: "[Reuniao]"
+    tag_aliases:
+      - "[Reuniao]"
+      - "[Reunião]"
+      - "[reuniao]"
+      - "[reunião]"
+    title: "Participação em reuniões"
+    section_id: "sessao-4"
+    description: >-
+      Participar em reuniões relacionadas para realizar levantamento de
+      requisitos, esclarecimento sobre sistemas, alinhamento com as áreas ou
+      outros assuntos que estejam relacionados com o desenvolvimento e
+      sustentação dos sistemas institucionais.
+    professional_profile: "A definir."
+    deliverable: "Registro do esclarecimento, ata de reunião ou lista de presença."
+    unit_of_measure: "Único."
+    ust:
+      base_value: 1
+      warranty_value: null
+      raw_text: "1 por hora de reunião."
+      calculation_type: "per_hour"
+      block_size: null
+      unit_parameter: "quantidade_horas_reuniao"
+      formula_description: "UST_total = 1 * quantidade_horas_reuniao"
+    complexity_rules: []
+    validation_guidelines:
+      requires_git_evidence: "not_required"
+      requires_prior_authorization: false
+      is_exceptional: false
+      primary_evidence_sources:
+        - "redmine_issue"
+        - "redmine_attachment"
+      expected_artifacts:
+        - "Registro do esclarecimento, ata de reunião ou lista de presença comprovando a pauta e a duração da reunião"
+      llm_audit_checklist:
+        - "Verificar a presença de ata de reunião, lista de presença ou registro formal do esclarecimento/alinhamento."
+        - "Conferir a duração em horas da reunião para cálculo de 1 UST por hora."

@@ -1,0 +1,31 @@
+# =============================================================================
+# .gitignore — Projeto VERA
+# =============================================================================
+
+# Arquivos de configuração locais contendo credenciais ou URLs reais
+vera/config/*.yaml
+vera/config/*.yml
+vera/config/*.json
+!vera/config/vera.yaml
+!vera/config/*.example.yaml
+!vera/config/*.example.yml
+!vera/config/*.example.json
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!*.example
+*.pem
+*.key
+*secret*
+*token*
+*credentials*
+
+# Relatórios e caches locais
+output/
+reports/
+tmp/
+cache/
+*.report.md
+.DS_Store
+Thumbs.db
